@@ -191,9 +191,4 @@ def has_repetition(text: str) -> bool:
     Boolean interface preserved for existing callers; the scan now covers the
     whole response instead of only its last 10,000 characters.
     """
-    return any(
-        window_compression_ratio(text[start:end]) > REPETITION_COMPRESSION_RATIO_THRESHOLD
-        for start, end in _iter_window_bounds(
-            len(text), window_size=REPETITION_WINDOW_SIZE_CHARS, stride=REPETITION_WINDOW_STRIDE_CHARS
-        )
-    )
+    return scan_repetition(text, stop_at_first_hit=True).has_repetition

@@ -354,7 +354,7 @@ def cpu_rollout_module(monkeypatch):
     """
     before_modules = set(sys.modules)
     try:
-        import ray
+        ray = pytest.importorskip("ray", reason="the production rollout metric path needs ray")
 
         def deployment_only(*args, **kwargs):
             raise AssertionError("CPU metrics test invoked a deployment dependency")
@@ -623,8 +623,7 @@ def test_diagnose_invalid_response_identifies_source_and_sample(tmp_path, suffix
     if suffix == "jsonl":
         path.write_text("\n".join(json.dumps(record) for record in records), encoding="utf-8")
     else:
-        import torch
-
+        torch = pytest.importorskip("torch", reason="the .pt dump path needs torch")
         torch.save({"samples": records}, path)
     with pytest.raises(ValueError) as exc:
         diagnose_dumps([path])
