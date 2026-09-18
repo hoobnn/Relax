@@ -189,10 +189,12 @@ The three hit windows overlap and span characters 15,000-35,000, so
 ## Cost
 
 Full-scan time is linear in response length. Window bounds are generated lazily,
-and the boolean helper returns on the first hit without retaining a bounds or
-ratio list; its auxiliary memory is `O(window_size)`, excluding the input.
-The detailed report still stores ratios and hit windows, so `scan_repetition`
-uses `O(window_size + K)` auxiliary memory for `K` scanned windows.
+and both entry points share one scan: `has_repetition` delegates to
+`scan_repetition` with the early exit enabled, so it stops at the first hit and
+keeps only the ratios of the windows scanned up to that point. Excluding the
+input, auxiliary memory is `O(window_size + K)` for `K` scanned windows — `K` is
+1 for a response that repeats from the start, and the full window count for
+clean text (about 199 ratios, roughly 6 KB, at one million characters).
 
 Measured on 2026-09-18 with macOS 27.0 arm64, Python 3.14.7, and five timing
 repeats. All individual cases use the full `scan_repetition`, including fully

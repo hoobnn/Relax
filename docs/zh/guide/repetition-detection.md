@@ -162,10 +162,11 @@ python -m relax.entrypoints.diagnose_repetition /path/dump/*.pt --only-hits
 
 ## 开销
 
-完整扫描耗时与响应长度成线性关系。窗口边界按需生成，布尔接口在首次命中后返回，
-不会保存完整边界或压缩比列表；排除输入文本后，其辅助内存为 `O(window_size)`。
-详细报告仍保留压缩比和命中窗口，因此 `scan_repetition` 的辅助内存为 `O(window_size + K)`，
-其中 `K` 是扫描窗口数。
+完整扫描耗时与响应长度成线性关系。窗口边界按需生成，两个入口共用同一趟扫描：
+`has_repetition` 委托 `scan_repetition` 并启用提前退出，因此在首次命中处停止，
+只保留截至该窗口的压缩比。排除输入文本后，辅助内存为 `O(window_size + K)`，
+其中 `K` 为已扫描窗口数——开头即重复时 `K` 为 1，纯净文本则为全部窗口数
+（100 万字符约 199 项，约 6 KB）。
 
 以下数据在 macOS 27.0 arm64、Python 3.14.7 下于 2026-09-18 实测，计时重复 5 次。
 单响应均运行完整 `scan_repetition`，包括全重复样例，未启用短路。
