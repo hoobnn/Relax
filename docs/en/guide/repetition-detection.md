@@ -251,8 +251,8 @@ PYTHONPATH=. python3 tests/utils/benchmark_repetition_scan.py --batches --json
 
 Output includes environment, repeat count, single-response CPU/wall timings,
 traced allocation peaks, independent-process peak RSS, and batch CPU/wall
-timings. The legacy `mean_ms` field still means mean wall time, and
-`peak_mem_mib` still means peak traced allocations. Omit `--batches` to run only
+timings. `wall_mean_ms` is mean wall time and `peak_mem_mib` is peak traced
+allocations. Omit `--batches` to run only
 the three single-response cases at 10,000 / 100,000 / 1,000,000 characters.
 
 CPU integration tests load the complete rollout module and call the real

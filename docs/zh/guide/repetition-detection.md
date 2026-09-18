@@ -212,7 +212,7 @@ PYTHONPATH=. python3 tests/utils/benchmark_repetition_scan.py --batches --json
 ```
 
 输出包含环境、重复次数、单响应 CPU / 墙钟耗时、跟踪内存峰值、独立进程峰值 RSS，
-以及批次 CPU / 墙钟耗时。旧字段 `mean_ms` 仍表示墙钟均值，`peak_mem_mib` 仍表示跟踪分配峰值。
+以及批次 CPU / 墙钟耗时。`wall_mean_ms` 表示墙钟均值，`peak_mem_mib` 表示跟踪分配峰值。
 省略 `--batches` 时只运行 1 万、10 万、100 万字符的三类单响应样例。
 
 CPU 集成测试加载完整 rollout 模块并调用真实 `compute_metrics_from_samples`，

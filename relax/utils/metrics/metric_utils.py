@@ -10,16 +10,7 @@ from relax.algorithms.spec import get_algorithm
 # Repetition detection lives in relax.utils.repetition, which imports only the
 # standard library so offline diagnosis runs without torch or the metrics
 # service stack. Re-exported here so the historical import path keeps working.
-from relax.utils.repetition import (  # noqa: F401
-    REPETITION_COMPRESSION_RATIO_THRESHOLD,
-    REPETITION_WINDOW_SIZE_CHARS,
-    REPETITION_WINDOW_STRIDE_CHARS,
-    RepetitionReport,
-    RepetitionWindow,
-    has_repetition,
-    repetition_window_bounds,
-    scan_repetition,
-)
+from relax.utils.repetition import has_repetition, scan_repetition  # noqa: F401
 from relax.utils.types import Sample
 
 

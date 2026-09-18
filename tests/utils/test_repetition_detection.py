@@ -104,7 +104,7 @@ def test_empty_string_is_not_repetitive():
 
     assert not report.has_repetition
     assert report.text_length == 0
-    assert report.compression_ratios == []
+    assert report.num_windows_scanned == 0
     assert report.max_compression_ratio is None
     assert not has_repetition("")
 
@@ -113,7 +113,7 @@ def test_short_response_below_one_window_is_scanned():
     report = scan_repetition("x" * (WINDOW - 1))
 
     assert report.has_repetition
-    assert len(report.compression_ratios) == 1
+    assert report.num_windows_scanned == 1
     assert report.hit_intervals == [(0, WINDOW - 1)]
     assert repetition_window_bounds(WINDOW - 1) == [(0, WINDOW - 1)]
 
@@ -121,7 +121,7 @@ def test_short_response_below_one_window_is_scanned():
 def test_exactly_one_window_is_scanned_once():
     report = scan_repetition("x" * WINDOW)
 
-    assert len(report.compression_ratios) == 1
+    assert report.num_windows_scanned == 1
     assert report.has_repetition
     assert report.hit_intervals == [(0, WINDOW)]
 
@@ -249,7 +249,7 @@ def test_stop_at_first_hit_short_circuits():
 
     assert short.has_repetition == full.has_repetition
     assert len(short.hit_windows) == 1
-    assert len(short.compression_ratios) < len(full.compression_ratios)
+    assert short.num_windows_scanned < full.num_windows_scanned
 
 
 @pytest.mark.parametrize("repetitive", [False, True])
@@ -272,7 +272,7 @@ def test_boolean_scan_visits_all_windows_or_stops_at_first_hit(monkeypatch, repe
 def test_short_clean_response_is_scanned_without_false_positive():
     report = scan_repetition("A short and ordinary answer.")
     assert not report.has_repetition
-    assert len(report.compression_ratios) == 1
+    assert report.num_windows_scanned == 1
     assert report.max_compression_ratio is not None
 
 
@@ -286,7 +286,7 @@ def test_report_to_dict_is_json_serializable():
     payload = json.loads(json.dumps(report.to_dict()))
 
     assert payload["has_repetition"] is True
-    assert payload["num_windows_scanned"] == len(report.compression_ratios)
+    assert payload["num_windows_scanned"] == report.num_windows_scanned
     assert payload["hit_windows"][0]["start"] == 0
     assert payload["covered_chars"] == report.covered_chars
 

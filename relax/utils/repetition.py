@@ -44,17 +44,23 @@ class RepetitionWindow:
 class RepetitionReport:
     """Full-text repetition scan result for a single response."""
 
-    has_repetition: bool
     text_length: int
     # Windows whose compression ratio exceeded the threshold.  Each interval
     # marks a *suspected* repetitive window, not an exact repetition boundary.
     hit_windows: list[RepetitionWindow] = field(default_factory=list)
-    # Compression ratio of every scanned window, in scan order.
-    compression_ratios: list[float] = field(default_factory=list)
+    # How many windows the scan measured.  Only the count is kept: the ratios
+    # of hit windows live in ``hit_windows`` and the largest is tracked below,
+    # so retaining every ratio would hold K floats the caller never reads.
+    num_windows_scanned: int = 0
     # Largest ratio seen across all scanned windows; None when nothing was
     # scanned (empty text).
     max_compression_ratio: float | None = None
     threshold: float = REPETITION_COMPRESSION_RATIO_THRESHOLD
+
+    @property
+    def has_repetition(self) -> bool:
+        """Whether any scanned window exceeded the threshold."""
+        return bool(self.hit_windows)
 
     @property
     def hit_intervals(self) -> list[tuple[int, int]]:
@@ -73,7 +79,7 @@ class RepetitionReport:
             "text_length": self.text_length,
             "threshold": self.threshold,
             "max_compression_ratio": self.max_compression_ratio,
-            "num_windows_scanned": len(self.compression_ratios),
+            "num_windows_scanned": self.num_windows_scanned,
             "hit_windows": [
                 {"start": w.start, "end": w.end, "compression_ratio": w.compression_ratio} for w in self.hit_windows
             ],
@@ -165,22 +171,24 @@ def scan_repetition(
         raise ValueError("threshold must be finite and positive")
     bounds = _iter_window_bounds(len(text), window_size=window_size, stride=stride)
 
-    ratios: list[float] = []
+    scanned = 0
+    max_ratio: float | None = None
     hits: list[RepetitionWindow] = []
     for start, end in bounds:
         ratio = window_compression_ratio(text[start:end])
-        ratios.append(ratio)
+        scanned += 1
+        if max_ratio is None or ratio > max_ratio:
+            max_ratio = ratio
         if ratio > threshold:
             hits.append(RepetitionWindow(start=start, end=end, compression_ratio=ratio))
             if stop_at_first_hit:
                 break
 
     return RepetitionReport(
-        has_repetition=bool(hits),
         text_length=len(text),
         hit_windows=hits,
-        compression_ratios=ratios,
-        max_compression_ratio=max(ratios) if ratios else None,
+        num_windows_scanned=scanned,
+        max_compression_ratio=max_ratio,
         threshold=threshold,
     )
 

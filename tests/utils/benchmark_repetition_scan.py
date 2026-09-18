@@ -82,7 +82,6 @@ def benchmark(length: int, repeats: int, case: str = "clean") -> dict:
         "case": case,
         "num_windows": num_windows,
         "has_repetition": report.has_repetition,
-        "mean_ms": mean_wall,  # Retained alias for existing benchmark consumers.
         "wall_mean_ms": mean_wall,
         "cpu_mean_ms": round(1000 * sum(cpu_durations) / repeats, 2),
         "min_ms": round(1000 * min(wall_durations), 2),
@@ -121,7 +120,7 @@ def benchmark_batch(length: int, batch_size: int, repeats: int, position: str) -
         "chars": length,
         "batch_size": batch_size,
         "position": position,
-        "mean_ms": round(1000 * sum(durations) / len(durations), 2),
+        "wall_mean_ms": round(1000 * sum(durations) / len(durations), 2),
         "cpu_mean_ms": round(1000 * sum(cpu_durations) / len(cpu_durations), 2),
     }
 
